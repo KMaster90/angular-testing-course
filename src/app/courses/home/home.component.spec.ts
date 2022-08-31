@@ -1,4 +1,4 @@
-import {async, ComponentFixture, fakeAsync, flush, flushMicrotasks, TestBed, waitForAsync} from '@angular/core/testing';
+import {async, ComponentFixture, fakeAsync, flush, flushMicrotasks, TestBed, tick, waitForAsync} from '@angular/core/testing';
 import {CoursesModule} from '../courses.module';
 import {DebugElement, TemplateRef} from '@angular/core';
 
@@ -14,7 +14,7 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {click} from '../common/test-utils';
 
 
-fdescribe('HomeComponent', () => {
+describe('HomeComponent', () => {
 
   let fixture: ComponentFixture<HomeComponent>;
   let component: HomeComponent;
@@ -81,6 +81,35 @@ fdescribe('HomeComponent', () => {
     }, 500);
 
   });
+  it('should display advanced courses when tab clicked - fakeAsync', fakeAsync(() => {
+    coursesService.findAllCourses.and.returnValue(of(setupCourses()));
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+    click(tabs[1]);
+    // tabs[1].nativeElement.click();
+    fixture.detectChanges();
+    flush();
+    const cardTitles = el.queryAll(By.css('.mat-tab-body-active .mat-card-title'));
+    expect(cardTitles.length).toBeGreaterThan(0, 'No card Titles found');
+    expect(cardTitles[0].nativeElement.textContent).toContain('Angular Security Course');
+
+  }));
+  it('should display advanced courses when tab clicked - waitForAsync', waitForAsync(() => {
+    coursesService.findAllCourses.and.returnValue(of(setupCourses()));
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+    click(tabs[1]);
+    // tabs[1].nativeElement.click();
+    fixture.detectChanges();
+    // flush();
+    fixture.whenStable().then(() => {
+      console.log('called whenStable');
+      const cardTitles = el.queryAll(By.css('.mat-tab-body-active .mat-card-title'));
+      expect(cardTitles.length).toBeGreaterThan(0, 'No card Titles found');
+      expect(cardTitles[0].nativeElement.textContent).toContain('Angular Security Course');
+    });
+
+  }));
 
 });
 
